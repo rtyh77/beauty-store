@@ -8,53 +8,53 @@
     <style>
         :root {
             --primary: #d81b60;
-            --primary-dark: #ad1457;
-            --bg-color: #fafafa;
+            --gold: #d4af37;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
-            --text-color: #222222;
-            --border-color: #eee;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
         }
 
         * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
         body { background-color: var(--bg-color); color: var(--text-color); padding-bottom: 80px; }
 
-        header { background: var(--card-bg); padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 5px; }
+        header { background: #0f172a; padding: 15px 20px; text-align: center; border-bottom: 2px solid var(--gold); sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.6rem; font-weight: 700; color: var(--gold); }
 
-        .search-bar { padding: 12px 20px; display: flex; gap: 10px; }
-        .search-bar input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        .search-container { padding: 15px 20px 5px 20px; }
+        .search-box { position: relative; width: 100%; }
+        .search-box input { width: 100%; padding: 12px 45px 12px 15px; border: 1px solid var(--border-color); border-radius: 25px; outline: none; background: white; font-size: 0.95rem; }
+        .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #64748b; }
 
         .categories { display: flex; gap: 10px; overflow-x: auto; padding: 10px 20px; scrollbar-width: none; }
-        .cat-btn { padding: 8px 16px; border: 1px solid var(--primary); border-radius: 20px; background: white; color: var(--primary); white-space: nowrap; cursor: pointer; font-weight: 600; }
+        .cat-btn { padding: 8px 18px; border: 1px solid var(--primary); border-radius: 20px; background: white; color: var(--primary); white-space: nowrap; cursor: pointer; font-weight: 600; }
         .cat-btn.active { background: var(--primary); color: white; }
 
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
-        .product-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; flex-direction: column; }
+        .product-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
         .product-card img { width: 100%; height: 220px; object-fit: cover; }
         .product-info { padding: 15px; flex: 1; display: flex; flex-direction: column; }
         .product-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 5px; }
-        .product-desc { font-size: 0.85rem; color: #666; margin-bottom: 10px; line-height: 1.4; flex: 1; }
+        .product-desc { font-size: 0.85rem; color: #64748b; margin-bottom: 10px; line-height: 1.4; flex: 1; }
         .product-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .price { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
-        .stock { font-size: 0.8rem; background: #f0f0f0; padding: 3px 8px; border-radius: 6px; color: #555; }
+        .stock { font-size: 0.8rem; background: #e2e8f0; padding: 3px 8px; border-radius: 6px; color: #475569; }
 
-        .btn-buy { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-buy { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
 
-        /* فقاعة الواتساب العائمة */
+        /* فقاعة الواتساب الحديثة */
         .whatsapp-float {
-            position: fixed; bottom: 20px; left: 20px; background-color: #25d366; color: white;
-            width: 55px; height: 55px; border-radius: 50%; text-align: center; font-size: 30px;
-            box-shadow: 2px 5px 10px rgba(0,0,0,0.3); z-index: 1000; display: flex;
-            align-items: center; justify-content: center; text-decoration: none;
+            position: fixed; bottom: 25px; left: 25px; background: linear-gradient(135deg, #25d366, #128c7e);
+            color: white; width: 55px; height: 55px; border-radius: 50%; box-shadow: 0 8px 20px rgba(37,211,102,0.4);
+            z-index: 1000; display: flex; align-items: center; justify-content: center; transition: 0.3s;
         }
+        .whatsapp-float:hover { transform: scale(1.1); }
 
-        /* نافذة الطلب الشفافة */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; }
         .form-control { margin-bottom: 12px; }
         .form-control input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
 
-        /* عداد الكمية + / - */
         .qty-picker { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 15px 0; }
         .qty-btn { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--primary); background: white; color: var(--primary); font-size: 1.2rem; font-weight: bold; cursor: pointer; }
         .qty-number { font-size: 1.2rem; font-weight: bold; width: 30px; text-align: center; }
@@ -66,25 +66,26 @@
         <div class="logo">✨ لمسة جمال</div>
     </header>
 
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="ابحث عن منتج..." onkeyup="filterProducts()">
+    <div class="search-container">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="ابحث عن منتج..." onkeyup="filterProducts()">
+        </div>
     </div>
 
-    <div class="categories" id="catContainer">
-        <button class="cat-btn active" onclick="filterCat('الكل')">الكل</button>
-        <button class="cat-btn" onclick="filterCat('العناية بالبشرة')">العناية بالبشرة</button>
-        <button class="cat-btn" onclick="filterCat('الكريمان والمرطبات')">الكريمان والمرطبات</button>
-        <button class="cat-btn" onclick="filterCat('المكياج والجمال')">المكياج والجمال</button>
+    <div class="categories">
+        <button class="cat-btn active" onclick="filterCat('الكل', event)">الكل</button>
+        <button class="cat-btn" onclick="filterCat('العناية بالبشرة', event)">العناية بالبشرة</button>
+        <button class="cat-btn" onclick="filterCat('الكريمان والمرطبات', event)">الكريمان والمرطبات</button>
+        <button class="cat-btn" onclick="filterCat('المكياج والجمال', event)">المكياج والجمال</button>
     </div>
 
     <div class="products-grid" id="productsGrid">جاري تحميل المنتجات...</div>
 
-    <!-- زر واتساب العائم -->
-    <a href="https://wa.me/213656708603" class="whatsapp-float" target="_blank" rel="noopener noreferrer">
-        <svg style="width:32px;height:32px;fill:white" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.299.431 2.504 1.156 3.473l-.759 2.767 2.836-.744c.937.512 2.012.802 3.155.803 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.766-5.768-5.766zm3.328 8.169c-.144.405-.838.774-1.17.807-.299.031-.688.142-2.316-.531-1.944-.805-3.185-2.784-3.282-2.913-.097-.129-.785-1.044-.785-1.99 0-.947.495-1.413.671-1.608.176-.195.385-.244.513-.244.128 0 .256.001.368.007.118.006.277-.045.433.329.16.384.544 1.328.592 1.425.048.097.08.21.016.338-.064.128-.096.208-.192.32-.096.112-.202.25-.289.336-.096.096-.197.201-.085.393.112.193.499.824 1.07 1.333.734.654 1.353.857 1.546.953.193.096.305.08.417-.048.112-.128.481-.561.609-.753.128-.193.256-.16.433-.096.176.064 1.122.529 1.315.625.192.096.32.144.368.224.048.08.048.465-.096.87-.001 0 0 0 0 0z"/></svg>
+    <a id="waBtn" href="https://wa.me/213656708603" class="whatsapp-float" target="_blank">
+        <svg style="width:30px;height:30px;fill:white" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.299.431 2.504 1.156 3.473l-.759 2.767 2.836-.744c.937.512 2.012.802 3.155.803 3.182 0 5.768-2.586 5.768-5.766 0-3.18-2.586-5.766-5.768-5.766zm3.328 8.169c-.144.405-.838.774-1.17.807-.299.031-.688.142-2.316-.531-1.944-.805-3.185-2.784-3.282-2.913-.097-.129-.785-1.044-.785-1.99 0-.947.495-1.413.671-1.608.176-.195.385-.244.513-.244.128 0 .256.001.368.007.118.006.277-.045.433.329.16.384.544 1.328.592 1.425.048.097.08.21.016.338-.064.128-.096.208-.192.32-.096.112-.202.25-.289.336-.096.096-.197.201-.085.393.112.193.499.824 1.07 1.333.734.654 1.353.857 1.546.953.193.096.305.08.417-.048.112-.128.481-.561.609-.753.128-.193.256-.16.433-.096.176.064 1.122.529 1.315.625.192.096.32.144.368.224.048.08.048.465-.096.87-.001 0 0 0 0 0z"/></svg>
     </a>
 
-    <!-- نافذة الطلب -->
     <div class="modal" id="orderModal">
         <div class="modal-content">
             <h3 style="margin-bottom:15px; color:var(--primary); text-align:center;">تأكيد الطلب</h3>
@@ -97,13 +98,13 @@
             <div class="form-control"><input type="tel" id="custPhone" placeholder="رقم الهاتف" required></div>
             <div class="form-control"><input type="text" id="custAddress" placeholder="العنوان والولاية" required></div>
             <button class="btn-buy" onclick="submitOrder()">إرسال الطلب الآن</button>
-            <button class="btn-buy" onclick="closeModal()" style="background:#888; margin-top:8px;">إلغاء</button>
+            <button class="btn-buy" onclick="closeModal()" style="background:#64748b; margin-top:8px;">إلغاء</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyD60g3bc-e6h9JMRUR3eKcD5oRO2rAb4vQ",
@@ -120,35 +121,67 @@
         let allProducts = [];
         let selectedProduct = null;
         let currentQty = 1;
+        let activeCategory = 'الكل';
+
+        async function initStore() {
+            await loadSettings();
+            await fetchProducts();
+        }
+
+        async function loadSettings() {
+            try {
+                const docSnap = await getDoc(doc(db, "settings", "store_config"));
+                if (docSnap.exists() && docSnap.data().whatsapp) {
+                    document.getElementById('waBtn').href = `https://wa.me/${docSnap.data().whatsapp}`;
+                }
+            } catch (e) {}
+        }
 
         async function fetchProducts() {
             const grid = document.getElementById('productsGrid');
             try {
                 const snapshot = await getDocs(collection(db, "products"));
                 allProducts = [];
-                snapshot.forEach(doc => allProducts.push({ id: doc.id, ...doc.data() }));
+                snapshot.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
                 renderProducts(allProducts);
-            } catch (e) { grid.innerHTML = "حدث خطأ أثناء تحميل المنتجات."; }
+            } catch (e) { grid.innerHTML = "خطأ في تحميل البيانات."; }
         }
 
         function renderProducts(list) {
             const grid = document.getElementById('productsGrid');
-            if (list.length === 0) { grid.innerHTML = "<p>لا توجد منتجات حالياً.</p>"; return; }
+            if (list.length === 0) { grid.innerHTML = "<p style='text-align:center;'>لا توجد منتجات مطابقة.</p>"; return; }
             grid.innerHTML = list.map(p => `
                 <div class="product-card">
-                    <img src="${p.image}" alt="${p.name}">
+                    <img src="${p.image}">
                     <div class="product-info">
                         <div class="product-title">${p.name}</div>
-                        <div class="product-desc">${p.description || 'بدون وصف'}</div>
+                        <div class="product-desc">${p.description || ''}</div>
                         <div class="product-meta">
                             <span class="price">${p.price} د.ج</span>
                             <span class="stock">الكمية: ${p.stock || 1}</span>
                         </div>
-                        <button class="btn-buy" onclick="openOrderModal('${p.id}')">إضافة للسلة / شراء</button>
+                        <button class="btn-buy" onclick="openOrderModal('${p.id}')">طلب</button>
                     </div>
                 </div>
             `).join('');
         }
+
+        window.filterProducts = function() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allProducts.filter(p => {
+                const matchCat = (activeCategory === 'الكل' || p.category === activeCategory);
+                const matchSearch = p.name.toLowerCase().includes(query) || (p.description && p.description.toLowerCase().includes(query));
+                return matchCat && matchSearch;
+            });
+            renderProducts(filtered);
+        };
+
+        window.filterCat = function(cat, event) {
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            activeCategory = cat;
+            filterProducts();
+        };
 
         window.openOrderModal = function(id) {
             selectedProduct = allProducts.find(p => p.id === id);
@@ -171,30 +204,21 @@
             const phone = document.getElementById('custPhone').value;
             const address = document.getElementById('custAddress').value;
 
-            if(!name || !phone || !address) return alert("يرجى ملء جميع الحقول!");
+            if(!name || !phone || !address) return alert("يرجى ملء كافة الحقول!");
 
             try {
                 await addDoc(collection(db, "orders"), {
-                    customerName: name,
-                    phone: phone,
-                    address: address,
+                    customerName: name, phone: phone, address: address,
                     items: [{ name: selectedProduct.name, qty: currentQty, price: selectedProduct.price }],
                     total: selectedProduct.price * currentQty,
                     createdAt: serverTimestamp()
                 });
-                alert("تم إرسال طلبك بنجاح! سنتصل بك قريباً.");
+                alert("تم تسجيل طلبك بنجاح!");
                 closeModal();
-            } catch (e) { alert("حدث خطأ أثناء الإرسال!"); }
+            } catch (e) { alert("حدث خطأ!"); }
         };
 
-        window.filterCat = function(cat) {
-            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (cat === 'الكل') renderProducts(allProducts);
-            else renderProducts(allProducts.filter(p => p.category === cat));
-        };
-
-        fetchProducts();
+        initStore();
     </script>
 </body>
 </html>
