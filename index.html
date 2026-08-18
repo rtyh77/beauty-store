@@ -34,7 +34,6 @@
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 20px; }
         .product-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
         
-        /* معرض الصور للتمرير الأفقي */
         .slider-container { position: relative; width: 100%; height: 230px; overflow: hidden; }
         .slider { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
         .slider::-webkit-scrollbar { display: none; }
@@ -116,7 +115,7 @@
             <div class="form-control"><input type="text" id="custName" placeholder="الاسم الكامل" required></div>
             <div class="form-control"><input type="tel" id="custPhone" placeholder="رقم الهاتف" required></div>
             <div class="form-control"><input type="text" id="custAddress" placeholder="العنوان والولاية" required></div>
-            <button class="btn-buy" onclick="submitOrder()">إرسال الطلب الآن</button>
+            <button class="btn-buy" id="submitOrderBtn" onclick="submitOrder()">إرسال الطلب الآن</button>
             <button class="btn-buy" onclick="closeModal()" style="background:#475569; margin-top:8px;">إلغاء</button>
         </div>
     </div>
@@ -141,6 +140,7 @@
         let selectedProduct = null;
         let currentQty = 1;
         let activeCategory = 'الكل';
+        let adminPhone = '213656708603';
 
         async function initStore() {
             await loadSettings();
@@ -151,7 +151,8 @@
             try {
                 const docSnap = await getDoc(doc(db, "settings", "store_config"));
                 if (docSnap.exists() && docSnap.data().whatsapp) {
-                    document.getElementById('waBtn').href = `https://wa.me/${docSnap.data().whatsapp}`;
+                    adminPhone = docSnap.data().whatsapp;
+                    document.getElementById('waBtn').href = `https://wa.me/${adminPhone}`;
                 }
             } catch (e) {}
         }
@@ -230,22 +231,47 @@
         };
 
         window.submitOrder = async function() {
-            const name = document.getElementById('custName').value;
-            const phone = document.getElementById('custPhone').value;
-            const address = document.getElementById('custAddress').value;
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
 
             if(!name || !phone || !address) return alert("يرجى ملء كافة الحقول!");
+
+            const submitBtn = document.getElementById('submitOrderBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "جاري الإرسال...";
+
+            const totalAmount = selectedProduct.price * currentQty;
 
             try {
                 await addDoc(collection(db, "orders"), {
                     customerName: name, phone: phone, address: address,
                     items: [{ name: selectedProduct.name, qty: currentQty, price: selectedProduct.price }],
-                    total: selectedProduct.price * currentQty,
+                    total: totalAmount,
                     createdAt: serverTimestamp()
                 });
-                alert("تم تسجيل طلبك بنجاح!");
+
+                // صياغة رسالة الواتساب للأدمن
+                const message = `🛍️ *طلب جديد من المتجر!*%0A%0A` +
+                                `👤 *اسم الزبون:* ${name}%0A` +
+                                `📞 *رقم الهاتف:* ${phone}%0A` +
+                                `📍 *العنوان:* ${address}%0A` +
+                                `📦 *المنتج:* ${selectedProduct.name}%0A` +
+                                `🔢 *الكمية:* ${currentQty}%0A` +
+                                `💰 *الإجمالي:* ${totalAmount} د.ج`;
+
                 closeModal();
-            } catch (e) { alert("حدث خطأ أثناء الإرسال!"); }
+                submitBtn.disabled = false;
+                submitBtn.innerText = "إرسال الطلب الآن";
+
+                // توجيه الزبون تلقائياً إلى الواتساب لإشعار الأدمن
+                window.location.href = `https://wa.me/${adminPhone}?text=${message}`;
+
+            } catch (e) {
+                alert("حدث خطأ أثناء الإرسال!");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "إرسال الطلب الآن";
+            }
         };
 
         initStore();
