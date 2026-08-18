@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم الاحترافية - متجر الجمال</title>
+    <title>لوحة التحكم - إدارة المتجر</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -42,17 +42,18 @@
         }
         .card h3 { margin-bottom: 15px; color: var(--primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
-        /* النماذج المدخلة */
+        /* النماذج والمدخلات */
         .form-group { margin-bottom: 15px; text-align: right; }
         label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
-        input, select {
+        input, textarea {
             width: 100%; padding: 12px; background: #0f172a; border: 1px solid var(--border-color);
             border-radius: 8px; color: white; outline: none; transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); }
+        textarea { resize: vertical; min-height: 80px; }
+        input:focus, textarea:focus { border-color: var(--primary); }
         
         /* معاينة الصورة */
-        #imgPreview { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 1px solid var(--primary); }
+        #imgPreview { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 2px solid var(--primary); }
 
         /* الأزرار */
         .btn {
@@ -69,18 +70,18 @@
         .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 8px; font-weight: bold; }
         .badge { background: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; }
         
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 15px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 15px; }
         .product-item { background: #0f172a; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; text-align: center; }
-        .product-item img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; }
+        .product-item img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; }
         .btn-delete { background: #ef4444; margin-top: 8px; padding: 6px; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <!-- نافذة كلمة السر -->
+    <!-- شاشة كلمة السر -->
     <div id="loginOverlay">
         <div class="login-box">
-            <h2>🔐 دخول Admin</h2>
+            <h2>🔐 دخول لوحة التحكم</h2>
             <div class="form-group">
                 <input type="password" id="passInput" placeholder="أدخل كلمة السر">
             </div>
@@ -91,7 +92,7 @@
 
     <!-- المحتوى الرئيسي -->
     <header>
-        <h2>👑 لوحة إدارة المتجر</h2>
+        <h2>⚙️ لوحة إدارة المتجر</h2>
     </header>
 
     <div class="container" id="mainContent">
@@ -102,14 +103,22 @@
             <form id="productForm">
                 <div class="form-group">
                     <label>اسم المنتج:</label>
-                    <input type="text" id="pName" placeholder="مثال: عطور الفخامة" required>
+                    <input type="text" id="pName" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label>الوصف:</label>
+                    <textarea id="pDesc" placeholder="تفاصيل ومعلومات عن المنتج..."></textarea>
                 </div>
                 <div class="form-group">
                     <label>السعر (د.ج):</label>
-                    <input type="number" id="pPrice" placeholder="4500" required>
+                    <input type="number" id="pPrice" placeholder="" required>
                 </div>
                 <div class="form-group">
-                    <label>صورة المنتج (اختر من المعرض):</label>
+                    <label>الكمية المتاحة:</label>
+                    <input type="number" id="pQty" value="1" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>صورة المنتج (من المعرض):</label>
                     <input type="file" id="pImgFile" accept="image/*" required>
                     <img id="imgPreview" alt="معاينة الصورة">
                 </div>
@@ -148,10 +157,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // كلمة السر الافتراضية
+        // كلمة السر
         const ADMIN_PASSWORD = "123"; 
 
-        let base64Image = "";
+        let compressedBase64Image = "";
 
         // التحقق من كلمة السر
         window.checkPassword = function() {
@@ -165,7 +174,7 @@
             }
         };
 
-        // تحويل الصورة المرفوعة من المعرض إلى Base64 مع ضغط حجمها
+        // ضغط الصورة تلقائيًا لتحميلها بسرعة كبيرة في المتجر
         document.getElementById('pImgFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -176,16 +185,20 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        const maxWidth = 500;
+                        
+                        // أقصى عرض للصورة 600 بكسل فقط لسرعة التحميل
+                        const maxWidth = 600;
                         const scaleSize = maxWidth / img.width;
                         canvas.width = maxWidth;
                         canvas.height = img.height * scaleSize;
 
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        base64Image = canvas.toDataURL('image/jpeg', 0.7); // ضغط الصورة لسرعة التحميل
+                        
+                        // ضغط الجودة إلى 65% لجعل الحجم خفيفًا جدًا
+                        compressedBase64Image = canvas.toDataURL('image/jpeg', 0.65); 
                         
                         const preview = document.getElementById('imgPreview');
-                        preview.src = base64Image;
+                        preview.src = compressedBase64Image;
                         preview.style.display = 'block';
                     }
                 };
@@ -193,29 +206,31 @@
             }
         });
 
-        // إرسال المنتج للـ Firebase
+        // إرسال البيانات إلى Firebase
         document.getElementById('productForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!base64Image) return alert("يرجى اختيار صورة أولاً!");
+            if (!compressedBase64Image) return alert("يرجى اختيار صورة أولاً!");
 
             try {
                 await addDoc(collection(db, "products"), {
                     name: document.getElementById('pName').value,
+                    description: document.getElementById('pDesc').value,
                     price: Number(document.getElementById('pPrice').value),
-                    image: base64Image,
+                    stock: Number(document.getElementById('pQty').value),
+                    image: compressedBase64Image,
                     createdAt: serverTimestamp()
                 });
-                alert("تمت إضافة المنتج بنجاح!");
+                alert("تم إضافة المنتج بنجاح!");
                 document.getElementById('productForm').reset();
                 document.getElementById('imgPreview').style.display = 'none';
-                base64Image = "";
+                compressedBase64Image = "";
                 loadProducts();
             } catch (err) {
                 alert("حدث خطأ أثناء الإضافة: " + err.message);
             }
         });
 
-        // جلب البيانات (الطلبات والمنتجات)
+        // جلب البيانات
         async function loadData() {
             loadOrders();
             loadProducts();
@@ -258,6 +273,7 @@
                             <img src="${prod.image}">
                             <h4>${prod.name}</h4>
                             <p style="color:var(--primary); font-weight:bold;">${prod.price} د.ج</p>
+                            <p style="font-size:0.8rem; color:#aaa;">المخزون: ${prod.stock || 1}</p>
                             <button class="btn btn-delete" onclick="deleteProduct('${docSnap.id}')">حذف</button>
                         </div>
                     `;
