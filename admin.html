@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المتجر</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f4f6f8; margin: 0; padding: 15px; color: #333; }
+        h1, h2 { text-align: center; color: #d81b60; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #d81b60; color: white; font-weight: bold; border: none; cursor: pointer; }
+        .order-item { border-bottom: 1px dashed #ccc; padding: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <h1>🛠️ لوحة تحكم المتجر</h1>
+
+    <!-- قسم إضافة منتج -->
+    <div class="card">
+        <h2>إضافة منتج جديد</h2>
+        <form id="addProductForm">
+            <input type="text" id="pName" placeholder="اسم المنتج" required>
+            <input type="number" id="pPrice" placeholder="السعر (د.ج)" required>
+            <input type="url" id="pImage" placeholder="رابط صورة المنتج" required>
+            <button type="submit">إضافة للمتجر</button>
+        </form>
+    </div>
+
+    <!-- قسم عرض الطلبات -->
+    <div class="card">
+        <h2>الطلبات الواردة 📦</h2>
+        <div id="ordersList">جاري تحميل الطلبات...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyD60g3bc-e6h9JMRUR3eKcD5oRO2rAb4vQ",
+          authDomain: "beauty-store-4f012.firebaseapp.com",
+          projectId: "beauty-store-4f012",
+          storageBucket: "beauty-store-4f012.firebasestorage.app",
+          messagingSenderId: "1053116874470",
+          appId: "1:1053116874470:web:32a41e8ce3e089d1920527"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // إضافة منتج جديد
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "products"), {
+                    name: document.getElementById('pName').value,
+                    price: Number(document.getElementById('pPrice').value),
+                    image: document.getElementById('pImage').value,
+                    createdAt: serverTimestamp()
+                });
+                alert("تم إضافة المنتج بنجاح!");
+                document.getElementById('addProductForm').reset();
+            } catch (error) {
+                alert("حدث خطأ في الإضافة: " + error.message);
+            }
+        });
+
+        // جلب وقراءة الطلبات
+        async function loadOrders() {
+            const ordersDiv = document.getElementById('ordersList');
+            try {
+                const snapshot = await getDocs(collection(db, "orders"));
+                ordersDiv.innerHTML = "";
+                if(snapshot.empty) {
+                    ordersDiv.innerHTML = "<p>لا توجد طلبات جديدة حالياً.</p>";
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let itemsHtml = data.items.map(i => `${i.name} (${i.qty})`).join(', ');
+                    ordersDiv.innerHTML += `
+                        <div class="order-item">
+                            <strong>الزبون:</strong> ${data.customerName}<br>
+                            <strong>الهاتف:</strong> ${data.phone}<br>
+                            <strong>العنوان:</strong> ${data.address}<br>
+                            <strong>الطلبات:</strong> ${itemsHtml}<br>
+                            <strong>المجموع:</strong> ${data.total} د.ج
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                ordersDiv.innerHTML = "خطأ في تحميل الطلبات.";
+            }
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>
