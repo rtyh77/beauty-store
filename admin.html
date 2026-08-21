@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم</title>
+
+    <!-- إعدادات تطبيق الويب (PWA) -->
+    <link rel="manifest" href="admin-manifest.json">
+    <meta name="theme-color" content="#d81b60">
+    <link rel="apple-touch-icon" href="admin-icon.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -121,6 +127,15 @@
             <button class="btn" onclick="closeEditModal()" style="background:#64748b; margin-top:8px;">إلغاء</button>
         </div>
     </div>
+
+    <!-- تسجيل الـ Service Worker لتفعيل التطبيق -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('Admin App Registered Successfully'))
+          .catch(err => console.log('SW registration failed: ', err));
+      }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
