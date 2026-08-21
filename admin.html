@@ -6,9 +6,14 @@
     <title>لوحة التحكم</title>
 
     <!-- إعدادات تطبيق الويب (PWA) -->
-    <link rel="manifest" href="admin-manifest.json">
+    <link rel="manifest" href="/beauty-store/admin-manifest.json">
     <meta name="theme-color" content="#d81b60">
-    <link rel="apple-touch-icon" href="admin-icon.png">
+    
+    <!-- دعم أجهزة iOS / Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="اللوحة">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3524/3524659.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -128,11 +133,11 @@
         </div>
     </div>
 
-    <!-- تسجيل الـ Service Worker لتفعيل التطبيق -->
+    <!-- تسجيل الـ Service Worker لتفعيل التطبيق مع مسار دقيق لـ GitHub Pages -->
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Admin App Registered Successfully'))
+        navigator.serviceWorker.register('/beauty-store/sw.js', { scope: '/beauty-store/' })
+          .then(() => console.log('Admin PWA Registered Successfully'))
           .catch(err => console.log('SW registration failed: ', err));
       }
     </script>
