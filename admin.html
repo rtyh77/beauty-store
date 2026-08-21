@@ -133,7 +133,7 @@
         </div>
     </div>
 
-    <!-- تسجيل الـ Service Worker لتفعيل التطبيق مع مسار دقيق لـ GitHub Pages -->
+    <!-- تسجيل الـ Service Worker -->
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/beauty-store/sw.js', { scope: '/beauty-store/' })
@@ -162,6 +162,7 @@
         let compressedImages = [];
         let loadedProducts = [];
 
+        // جلب الإعدادات فور فتح الصفحة لضمان التحقق من كلمة السر الصحيحة
         async function loadConfig() {
             try {
                 const docSnap = await getDoc(doc(db, "settings", "store_config"));
@@ -174,12 +175,20 @@
             } catch (e) {}
         }
 
-        window.checkPassword = function() {
-            if (document.getElementById('passInput').value === currentPass) {
+        // استدعاء جلب الإعدادات عند بداية التشغيل
+        loadConfig();
+
+        window.checkPassword = async function() {
+            // إعادة التأكد من كلمة السر من الفايربيس عند الضغط على دخول
+            await loadConfig();
+            const inputVal = document.getElementById('passInput').value;
+            if (inputVal === currentPass) {
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 loadData();
-            } else { alert("كلمة السر خاطئة!"); }
+            } else { 
+                alert("كلمة السر خاطئة!"); 
+            }
         };
 
         window.saveSettings = async function() {
@@ -189,7 +198,7 @@
                 await setDoc(doc(db, "settings", "store_config"), { whatsapp: wa, pass: pass }, { merge: true });
                 currentPass = pass;
                 alert("تم حفظ الإعدادات بنجاح!");
-            } catch (e) { alert("حدث خطأ!"); }
+            } catch (e) { alert("حدث خطأ في حفظ الإعدادات!"); }
         };
 
         const compressFile = (file) => new Promise((resolve) => {
@@ -243,11 +252,11 @@
                 document.getElementById('productForm').reset();
                 compressedImages = [];
                 loadProducts();
-            } catch (err) { alert("حدث خطأ!"); }
+            } catch (err) { alert("حدث خطأ أثناء حفظ المنتج!"); }
             finally { submitBtn.disabled = false; loading.style.display = 'none'; }
         });
 
-        function loadData() { loadConfig(); loadOrders(); loadProducts(); }
+        function loadData() { loadOrders(); loadProducts(); }
 
         async function loadOrders() {
             const container = document.getElementById('ordersContainer');
@@ -334,11 +343,23 @@
         };
 
         window.deleteOrder = async function(id) {
-            if(confirm("حذف هذا الطلب؟")) { await deleteDoc(doc(db, "orders", id)); loadOrders(); }
+            if(confirm("حذف هذا الطلب؟")) { 
+                await deleteDoc(doc(db, "orders", id)); 
+                loadOrders(); 
+            }
         };
 
+        // تم إصلاح دالة الحذف هنا
         window.deleteProduct = async function(id) {
-            if(confirm("حذف هذا المنتج؟")) { await deleteDoc(doc(doc(db, "products", id))); loadProducts(); }
+            if(confirm("هل أنت تأكد من حذف هذا المنتج؟")) { 
+                try {
+                    await deleteDoc(doc(db, "products", id)); 
+                    alert("تم حذف المنتج بنجاح!");
+                    loadProducts(); 
+                } catch(e) {
+                    alert("حدث خطأ أثناء الحذف!");
+                }
+            }
         };
     </script>
 </body>
